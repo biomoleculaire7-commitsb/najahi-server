@@ -1,0 +1,22 @@
+services:
+  - type: web
+    name: najahi-server
+    env: node
+    region: frankfurt
+    plan: free
+    buildCommand: npm install
+    startCommand: node src/index.js
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: ANTHROPIC_API_KEY
+        sync: false
+      - key: BRIGHTDATA_HOST
+        value: brd.superproxy.io
+      - key: BRIGHTDATA_PORT
+        value: "9515"
+      - key: BRIGHTDATA_USER
+        sync: false
+      - key: BRIGHTDATA_PASS
+        sync: false
