@@ -13,16 +13,19 @@ app.get('/health', (req, res) => {
 
 async function geminiAsk(prompt) {
   return new Promise((resolve, reject) => {
-    const key  = process.env.GEMINI_API_KEY;
+    const key  = process.env.GROQ_API_KEY;
     const body = JSON.stringify({
-      contents: [{ parts: [{ text: prompt }] }],
-      generationConfig: { temperature: 0.7, maxOutputTokens: 2048 }
+      model: 'llama-3.3-70b-versatile',
+      messages: [{ role: 'user', content: prompt }],
+      max_tokens: 2048,
+      temperature: 0.7
     });
     const options = {
-      hostname: 'generativelanguage.googleapis.com',
-      path: `/v1beta/models/gemini-2.0-flash:generateContent?key=${key}`,
+      hostname: 'api.groq.com',
+      path: '/openai/v1/chat/completions',
       method: 'POST',
       headers: {
+        'Authorization': 'Bearer ' + key,
         'Content-Type': 'application/json',
         'Content-Length': Buffer.byteLength(body)
       }
@@ -34,10 +37,10 @@ async function geminiAsk(prompt) {
         try {
           const d = JSON.parse(data);
           if (d.error) { reject(new Error(d.error.message)); return; }
-          const text = d.candidates[0].content.parts[0].text
+          const text = d.choices[0].message.content
             .replace(/```json|```/g, '').trim();
           resolve(JSON.parse(text));
-        } catch(e) { reject(e); }
+        } catch(e) { reject(new Error('خطأ في البيانات: ' + e.message)); }
       });
     });
     req.on('error', reject);
